@@ -18,6 +18,6 @@ public interface TaskMapper {
     @Insert("INSERT INTO task(value, time, created_at) VALUES (#{value}, #{time}, #{createdAt})")
     void addTask(@Param("value") String value, @Param("time") Date time, @Param("createdAt") Date createdAt);
 
-    @Select("select id, value, time, created_at as createdAt from Task WHERE ROWNUM &lt;= #{latestTasksCount}")
+    @Select("select id, value, time, created_at as createdAt from Task WHERE ROWNUM <= #{latestTasksCount}")
     List<Task> getLatestTasks(@Param("latestTasksCount") int latestTasksCount);
 }

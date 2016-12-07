@@ -40,18 +40,15 @@ public class APIController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/result/{taskId}")
     Result getResult(@PathVariable Long taskId) {
-        //TODO add proper DB request
-        return new Result(1l, 1l, "resultvalue");
+        return resultMapper.getResultByTaskId(taskId);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/task/latest")
     List<Task> getLatestTasks() {
-        //TODO add proper DB request
 //        List<Task> result = new ArrayList<>();
 //        result.add(new Task(2l, "anothertask", new Date(), new Date()));
 //        return result;
         List<Task> result =  taskMapper.getLatestTasks(7);
-        logger.debug("REQUEST LATEST " + result.size());
         return result;
     }
 
