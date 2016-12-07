@@ -6,6 +6,7 @@ package com.maxilect.pstry;
 
 import com.maxilect.pstry.dao.ResultMapper;
 import com.maxilect.pstry.dao.TaskMapper;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @RestController
 public class APIController {
+    final static Logger logger = Logger.getLogger(APIController.class);
 
     private static final Long STUB_ID = 1l;
     @Autowired
@@ -45,8 +47,11 @@ public class APIController {
     @RequestMapping(method = RequestMethod.GET, value = "/task/latest")
     List<Task> getLatestTasks() {
         //TODO add proper DB request
-        List<Task> result = new ArrayList<>();
-        result.add(new Task(2l, "anothertask", new Date(), new Date()));
+//        List<Task> result = new ArrayList<>();
+//        result.add(new Task(2l, "anothertask", new Date(), new Date()));
+//        return result;
+        List<Task> result =  taskMapper.getLatestTasks(7);
+        logger.debug("REQUEST LATEST " + result.size());
         return result;
     }
 

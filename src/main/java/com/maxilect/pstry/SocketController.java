@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Random;
 
 
+import com.maxilect.pstry.dao.ResultMapper;
+import com.maxilect.pstry.dao.TaskMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -25,6 +27,11 @@ public class SocketController {
   private Random rand = new Random(System.currentTimeMillis());
   final static Logger logger = Logger.getLogger(SocketController.class);
 
+  @Autowired
+  private TaskMapper taskMapper;
+  @Autowired
+  private ResultMapper resultMapper;
+
   private void updateTaskAndBroadcast() {
     template.convertAndSend("/topic/tasks", tasks);
   }
@@ -35,7 +42,8 @@ public class SocketController {
   @MessageMapping("/addTask")
   public void addStock(Task task) throws Exception {
     //TODO add proper logic
-    tasks.add(new Task(1l, "taskvalue", new Date()));
+//    tasks.add(new Task(1l, "taskvalue", new Date(), new Date()));
+    tasks = taskMapper.getLatestTasks(7);
     updateTaskAndBroadcast();
   }
 
