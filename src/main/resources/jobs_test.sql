@@ -5,9 +5,10 @@ GRANT ALL PRIVILEGES TO demo;
 -- all further actions should be performed under user demo!!!!
 
 CREATE TABLE task (
-  id    NUMBER PRIMARY KEY,
-  value VARCHAR2(50) NOT NULL,
-  time  TIMESTAMP    NOT NULL
+  id         NUMBER PRIMARY KEY,
+  value      VARCHAR2(50) NOT NULL,
+  time       TIMESTAMP    NOT NULL,
+  created_at TIMESTAMP    NOT NULL
 );
 
 CREATE SEQUENCE task_pk_seq CACHE 100;
