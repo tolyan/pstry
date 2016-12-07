@@ -9,9 +9,7 @@ services:
             - "1521:1521"
     web-app:
         hostname: web-srv
-        image: tomcat:7.0.56
-        build:
-            context: ./web
+        image: demo-tomcat
         links:
             - db-srv
         depends_on:
