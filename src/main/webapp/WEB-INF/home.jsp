@@ -24,8 +24,10 @@
   <script>
 
     $( document ).ready(function() {
-        $.get("/taskmanager/task/latest", function(data, status){
-                var json = [data];
+        $.ajax({
+            url: "/taskmanager/task/latest"
+        }).then(function(data) {
+                var json = data;
                 $("#jqGrid").jqGrid({
                             data: json,
                             datatype: "local",
@@ -33,7 +35,7 @@
                             colModel: [
                                 { name: "id", width:300 ,height:"auto"},
                                 { name: "value", width: 150, align: "right",height:"auto" },
-                                { name: "time", width: 100, align: "right" ,height:"auto"}
+                                { name: "timeStr", width: 100, align: "right" ,height:"auto"}
                             ],
                             rownumbers:true,
                             viewrecords: true,
@@ -68,7 +70,7 @@
 
     // Callback function to be called when stomp client is connected to server
     var connectCallback = function() {
-      stompClient.subscribe('/topic/tasks', makeGrid);
+      stompClient.subscribe('/topic/tasks', updateGrid);
       stompClient.subscribe('/topic/tasks', renderTask);
     };
 
@@ -92,7 +94,14 @@
       });
     });
 
+    function updateGrid(data) {
+        alert(data.body);
+        var $grid = $("#jqGrid"), // the grid
+        p = $grid.jqGrid("getGridPagam");
 
+        p.data = data.body;
+        $grid.trigger("reloadGrid", [{current: true}]);
+    }
 
   </script>
 </body>
