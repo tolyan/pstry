@@ -13,6 +13,8 @@
 
   <mvc:resources mapping="/resources/**" location="/resources/" />
 
+  <import resource="orm-config.xml"/>
+
   <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
     <property name="prefix" value="/WEB-INF/" />
     <property name="suffix" value=".jsp" />
