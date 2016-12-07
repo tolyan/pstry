@@ -7,10 +7,7 @@
 <body>
   <h1>Task Manager</h1>
 
-  <table>
-    <thead><tr><th>Id</th><th>Content</th><th>Time</th></tr></thead>
-    <tbody id="task"></tbody>
-  </table>
+  <table id='jqGrid'></table>
 
   <p class="new">
     Content: <input type="text" class="content"/>
@@ -18,10 +15,36 @@
     <button class="add">Add</button>
   </p>
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/themes/redmond/jquery-ui.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.13.5/css/ui.jqgrid.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.1/sockjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.13.5/js/jquery.jqgrid.min.js"></script>
   <script>
+
+    $( document ).ready(function() {
+        $.get("/taskmanager/task/latest", function(data, status){
+                var json = [data];
+                $("#jqGrid").jqGrid({
+                            data: json,
+                            datatype: "local",
+                            colNames: [ "id", "value", "timeStr"],
+                            colModel: [
+                                { name: "id", width:300 ,height:"auto"},
+                                { name: "value", width: 150, align: "right",height:"auto" },
+                                { name: "time", width: 100, align: "right" ,height:"auto"}
+                            ],
+                            rownumbers:true,
+                            viewrecords: true,
+                            gridview: true,
+                            autoencode: true,
+                            caption: "Recent Tasks"
+                        });
+            });
+    });
+
+
     //Create stomp client over sockJS protocol
     var socket = new SockJS("/taskmanager/ws");
     var stompClient = Stomp.over(socket);
@@ -42,11 +65,12 @@
         );
       }
     }
-    
+
     // Callback function to be called when stomp client is connected to server
     var connectCallback = function() {
+      stompClient.subscribe('/topic/tasks', makeGrid);
       stompClient.subscribe('/topic/tasks', renderTask);
-    }; 
+    };
 
     // Callback function to be called when stomp client could not connect to server
     var errorCallback = function(error) {
@@ -55,7 +79,7 @@
 
     // Connect to server via websocket
     stompClient.connect("guest", "guest", connectCallback, errorCallback);
-    
+
     // Register handler for add button
     $(document).ready(function() {
       $('.add').click(function(e){
@@ -67,6 +91,8 @@
         return false;
       });
     });
+
+
 
   </script>
 </body>
