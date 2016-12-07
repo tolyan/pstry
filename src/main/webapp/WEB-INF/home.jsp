@@ -11,16 +11,19 @@
 
   <p class="new">
     Content: <input type="text" class="content"/>
-    Execution time: <input type="text" class="time"/>
+    Execution time: <input type="text" data-timeEntry="show24Hours: true, showSeconds: true, showminTime: 'new Date(0, 0, 0, 8, 30, 0)'"/>
     <button class="add">Add</button>
   </p>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/themes/redmond/jquery-ui.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.13.5/css/ui.jqgrid.min.css">
+  <link rel="stylesheet" type="text/css" href="css/jquery.timeentry.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.1/sockjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.13.5/js/jquery.jqgrid.min.js"></script>
+  <script type="text/javascript" src="js/jquery.plugin.js"></script>
+  <script type="text/javascript" src="js/jquery.timeentry.js"></script>
   <script>
 
     $( document ).ready(function() {
@@ -85,13 +88,24 @@
 
     // Register handler for add button
     $(document).ready(function() {
+      $('#time').timeEntry();
+
       $('.add').click(function(e){
-        e.preventDefault();
-        var value = $('.new .value').val();
-        var id = Number($('.new .id').val());
-        var jsonstr = JSON.stringify({ 'id': id,'value': value });
-        stompClient.send("/app/addTask", {}, jsonstr);
-        return false;
+            var value = $('.new .content').val();
+            var time = $('.new .time').val();
+            $.ajax({
+                    url: "/taskmanager/task",
+                    type: "POST",
+                    contentType: "application/json",
+                    dataType: "json",
+                    data: JSON.stringify({ 'time': time,'value': value}),
+                    success: function(){
+                        alert("Task scheduled.");
+                    },
+                    error: function(){
+                        alert("Service unavailable.");
+                    }
+                });
       });
     });
 
@@ -101,7 +115,6 @@
         }).then(function(data) {
            var $grid = $("#jqGrid"),
            p = $grid.jqGrid("getGridParam");
-           data.push({"id":Math.floor((Math.random() * 10) + 1),"value":"new task","time":1481117685429,"timeStr":"07 Dec 2016, 20:34:45"});
            p.data = data;
            $grid.trigger("reloadGrid", [{current: true}]);
         });

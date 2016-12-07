@@ -14,6 +14,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -33,6 +34,8 @@ public class APIController {
                 .fromCurrentRequest().path("/{id}")
                 .buildAndExpand(STUB_ID).toUri();
         Date createdAt = new Date();
+        logger.debug("RECIVED: " + task);
+        Calendar calendar = Calendar.getInstance();
         taskMapper.addTask(task.getValue(), task.getTime(), createdAt);
         task.setCreatedAt(createdAt);
         return ResponseEntity.created(location).build();

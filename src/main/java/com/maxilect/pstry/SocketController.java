@@ -8,6 +8,8 @@ import java.util.Random;
 
 import com.maxilect.pstry.dao.ResultMapper;
 import com.maxilect.pstry.dao.TaskMapper;
+import oracle.jdbc.OracleConnection;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -26,6 +28,9 @@ public class SocketController {
   private List<Task> tasks = new ArrayList<Task>();
   private Random rand = new Random(System.currentTimeMillis());
   final static Logger logger = Logger.getLogger(SocketController.class);
+
+  @Autowired
+  private BasicDataSource ds;
 
   @Autowired
   private TaskMapper taskMapper;
@@ -54,6 +59,13 @@ public class SocketController {
   @RequestMapping(value = "/", method = RequestMethod.GET)
   public String home() {
     return "home";
+  }
+
+  public void registerNotification(){
+      String url = ds.getUrl();
+      String user = ds.getUsername();
+      String pwd = ds.getPassword();
+
   }
 
 }
