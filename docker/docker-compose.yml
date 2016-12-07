@@ -4,13 +4,14 @@ services:
         image: wnameless/oracle-xe-11g
         privileged: true
         hostname: db-srv
-        container_name: db-srv
         ports:
             - "23:22"
             - "1521:1521"
     web-app:
         hostname: web-srv
         image: tomcat:7.0.56
+        build:
+            context: ./web
         links:
             - db-srv
         depends_on:
