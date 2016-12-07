@@ -5,6 +5,7 @@
   <groupId>com.maxilect</groupId>
   <artifactId>taskmanager</artifactId>
   <name>taskmanager</name>
+
   <packaging>war</packaging>
   <version>1.0</version>
   <properties>
@@ -106,6 +107,7 @@
     </dependency>
   </dependencies>
   <build>
+    <finalName>taskmanager</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
