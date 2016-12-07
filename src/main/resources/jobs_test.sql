@@ -46,34 +46,64 @@ WHEN (new.id IS NULL)
 -- stored procedure which will be submitted to the background jobs
 CREATE OR REPLACE PROCEDURE calculateResult(taskId IN NUMBER)
 IS
-  concatenatedValue VARCHAR2(250);
   BEGIN
-    SELECT listagg(task.value, ' ')
-    WITHIN GROUP (
-      ORDER BY task.id)
-    INTO concatenatedValue
-    FROM task
-    WHERE ROWNUM <= 3;
-    INSERT INTO result (task_id, value) VALUES (task_id, concatenatedValue);
+    DECLARE concatenatedValue VARCHAR2(250);
+    BEGIN
+      SELECT listagg(value, '')
+      WITHIN GROUP (
+        ORDER BY id)
+      INTO concatenatedValue
+      FROM task
+      WHERE ROWNUM <= 3;
+      INSERT INTO result (task_id, value) VALUES (taskId, concatenatedValue);
+    END;
   END;
 
--- sample stored procedure to check scheduled jobs
-CREATE OR REPLACE PROCEDURE procPrintHelloWorld
+-- stored procedure which creates and adds to the queue new background scheduled jobs
+CREATE OR REPLACE PROCEDURE submitTask(taskId IN NUMBER)
 IS
   BEGIN
+    DECLARE startTime TIMESTAMP;
+    BEGIN
+      SELECT time
+      INTO startTime
+      FROM task
+      WHERE id = taskId;
 
-    insert into task(value, time) VALUES ('value2', current_date);
+      DBMS_SCHEDULER.CREATE_PROGRAM
+      (program_name        => 'backgroundJob' || taskId
+      , program_type        => 'STORED_PROCEDURE'
+      , program_action      => 'calculateResult'
+      , enabled             => FALSE
+      , number_of_arguments => 1
+      );
+      DBMS_SCHEDULER.DEFINE_PROGRAM_ARGUMENT
+      (program_name      => 'backgroundJob' || taskId
+      , argument_position => 1
+      , argument_name     => 'taskId'
+      , argument_type     => 'NUMBER'
+      );
+      DBMS_SCHEDULER.ENABLE('backgroundJob' || taskId);
 
+      DBMS_SCHEDULER.CREATE_SCHEDULE
+      (schedule_name   => 'demoJobSchedule' || taskId
+      , start_date      => startTime
+      , repeat_interval => NULL
+      , end_date        => SYSTIMESTAMP + INTERVAL '1' MONTH
+      );
+
+      DBMS_SCHEDULER.CREATE_JOB
+      (job_name      => 'concatenationJob' || taskId
+      , program_name  => 'backgroundJob' || taskId
+      , schedule_name => 'demoJobSchedule' || taskId
+      , auto_drop => TRUE
+      , enabled       => FALSE
+      );
+      DBMS_SCHEDULER.SET_JOB_ANYDATA_VALUE
+      (job_name      => 'concatenationJob' || taskId
+      , argument_name  => 'taskId'
+      , argument_value => ANYDATA.CONVERTNUMBER(taskId)
+      );
+      DBMS_SCHEDULER.ENABLE('concatenationJob' || taskId);
+    END;
   END;
-
--- create a sample job. We don't need repetition, we need to fire it only once
-begin
-  dbms_scheduler.create_job(
-      job_name => 'Scheduled_job_for_demo',
-      job_type => 'STORED_PROCEDURE',
-      job_action => 'procPrintHelloWorld',
-      start_date => sysdate + (5/(24*60)),
-      repeat_interval => 'FREQ=MINUTELY; interval=1',
-      enabled => TRUE,
-      comments => 'Runtime: Every day every minute');
-end;
