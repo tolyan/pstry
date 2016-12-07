@@ -24,8 +24,10 @@
   <script>
 
     $( document ).ready(function() {
-        $.get("/taskmanager/task/latest", function(data, status){
-                var json = [data];
+        $.ajax({
+            url: "/taskmanager/task/latest"
+        }).then(function(data) {
+                var json = data;
                 $("#jqGrid").jqGrid({
                             data: json,
                             datatype: "local",
@@ -33,15 +35,16 @@
                             colModel: [
                                 { name: "id", width:300 ,height:"auto"},
                                 { name: "value", width: 150, align: "right",height:"auto" },
-                                { name: "time", width: 100, align: "right" ,height:"auto"}
+                                { name: "timeStr", width: 100, align: "right" ,height:"auto"}
                             ],
+                            rowNum:7,
                             rownumbers:true,
                             viewrecords: true,
                             gridview: true,
                             autoencode: true,
                             caption: "Recent Tasks"
                         });
-            });
+        });
     });
 
 
@@ -68,7 +71,7 @@
 
     // Callback function to be called when stomp client is connected to server
     var connectCallback = function() {
-      stompClient.subscribe('/topic/tasks', makeGrid);
+      stompClient.subscribe('/topic/tasks', updateGrid);
       stompClient.subscribe('/topic/tasks', renderTask);
     };
 
@@ -92,7 +95,19 @@
       });
     });
 
+    function updateGrid() {
+        $.ajax({
+            url: "/taskmanager/task/latest"
+        }).then(function(data) {
+           var $grid = $("#jqGrid"),
+           p = $grid.jqGrid("getGridParam");
+           data.push({"id":Math.floor((Math.random() * 10) + 1),"value":"new task","time":1481117685429,"timeStr":"07 Dec 2016, 20:34:45"});
+           p.data = data;
+           $grid.trigger("reloadGrid", [{current: true}]);
+        });
 
+
+    }
 
   </script>
 </body>
