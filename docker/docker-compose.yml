@@ -1,7 +1,7 @@
 version: '2'
 services:
     db-srv:
-        image: wnameless/oracle-xe-11g
+        image: demo-db
         privileged: true
         hostname: db-srv
         ports:
