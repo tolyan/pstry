@@ -37,13 +37,14 @@
                                 { name: "value", width: 150, align: "right",height:"auto" },
                                 { name: "timeStr", width: 100, align: "right" ,height:"auto"}
                             ],
+                            rowNum:7,
                             rownumbers:true,
                             viewrecords: true,
                             gridview: true,
                             autoencode: true,
                             caption: "Recent Tasks"
                         });
-            });
+        });
     });
 
 
@@ -94,13 +95,18 @@
       });
     });
 
-    function updateGrid(data) {
-        alert(data.body);
-        var $grid = $("#jqGrid"), // the grid
-        p = $grid.jqGrid("getGridPagam");
+    function updateGrid() {
+        $.ajax({
+            url: "/taskmanager/task/latest"
+        }).then(function(data) {
+           var $grid = $("#jqGrid"),
+           p = $grid.jqGrid("getGridParam");
+           data.push({"id":Math.floor((Math.random() * 10) + 1),"value":"new task","time":1481117685429,"timeStr":"07 Dec 2016, 20:34:45"});
+           p.data = data;
+           $grid.trigger("reloadGrid", [{current: true}]);
+        });
 
-        p.data = data.body;
-        $grid.trigger("reloadGrid", [{current: true}]);
+
     }
 
   </script>
