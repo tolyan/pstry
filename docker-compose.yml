@@ -1,0 +1,22 @@
+version: '2'
+services:
+    db-srv:
+        image: wnameless/oracle-xe-11g
+        privileged: true
+        hostname: db-srv
+        container_name: db-srv
+        ports:
+            - "23:22"
+            - "1521:1521"
+    web-app:
+        hostname: web-srv
+        image: tomcat:7.0.56
+        links:
+            - db-srv
+        depends_on:
+          - db-srv
+        ports:
+            #Default server Port
+            - "8080:8080"
+            #Debug Port
+            - "8000:8000"
