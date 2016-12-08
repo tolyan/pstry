@@ -26,6 +26,8 @@ public interface TaskMapper {
     @Options(statementType = StatementType.CALLABLE)
     void submitTaskForBackgroundExecution(@Param("taskId") long taskId);
 
-    @Select("select id, value, time, created_at as createdAt from Task WHERE ROWNUM <= #{latestTasksCount}")
+    @Select("select task.id, task.value, task.time, task.created_at as createdAt, result.value as result from Task " +
+            "task  join Result result on result.task_id = task.id WHERE ROWNUM <= #{latestTasksCount} " +
+            " order by task.created_at DESC")
     List<Task> getLatestTasks(@Param("latestTasksCount") int latestTasksCount);
 }
