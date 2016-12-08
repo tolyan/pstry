@@ -9,16 +9,24 @@
 
   <table id='jqGrid'></table>
 
+  <div class="time-selector"></div>
+  <p><span class="time-span"></span></p>
   <p class="new">
-    Content: <input type="text" class="content"/>
-    Execution time: <input type="text" name="basic_example_1" id="basic_example_1" value="" class="hasDatepicker">
-    <button class="add">Add</button>
+    Task: <input type="text" class="content"/>
+     <button class="add">Add</button>
   </p>
+
+
+  <p>Current Task: </p>
+  <p>Created at: </p>
+  <p>Scheduled at: </p>
+  <p>Result: </p>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/themes/redmond/jquery-ui.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.13.5/css/ui.jqgrid.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/jqCron.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.1/sockjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
@@ -26,10 +34,27 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.13.5/js/jquery.jqgrid.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-sliderAccess.js"></script>
+  <script src="${pageContext.request.contextPath}/resources/jqCron.js"></script>
+  <script src="${pageContext.request.contextPath}/resources/jqCron.en.js"></script>
+
   <script>
 
+
+
     $( document ).ready(function() {
-        $('#basic_example_1').timepicker();
+        var curr = new Date();
+        var allowed = new Date(curr.getTime() + 5*60000);
+        var timeselector = $('.time-selector');
+        timeselector.datetimepicker({
+            timeFormat: "hh:mm:ss",
+            hour: curr.getHours(),
+            minute: curr.getMinutes(),
+            second: curr.getSeconds(),
+            minTime: curr,
+            maxTime: allowed
+        });
+
 
         $.ajax({
             url: "/taskmanager/task/latest"
@@ -40,7 +65,7 @@
                             datatype: "local",
                             colNames: [ "id", "value", "timeStr"],
                             colModel: [
-                                { name: "id", width:300 ,height:"auto"},
+                                { name: "ID", width:300 ,height:"auto"},
                                 { name: "value", width: 150, align: "right",height:"auto" },
                                 { name: "timeStr", width: 100, align: "right" ,height:"auto"}
                             ],
@@ -54,9 +79,8 @@
         });
 
         $('.add').click(function(e){
-                alert("click");
+                var time = timeselector.datetimepicker('getDate');
                 var value = $('.new .content').val();
-                var time = $('.new .time').val();
                 $.ajax({
                     url: "/taskmanager/task",
                     type: "POST",
