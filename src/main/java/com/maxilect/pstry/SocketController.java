@@ -52,13 +52,15 @@ public class SocketController {
      */
     @MessageMapping("/addTask")
     public void addTask(Task task) throws Exception {
+        Date createdAt = new Date();
+        if (task != null) {
+            task.setCreatedAt(createdAt);
+        }
         if (!TaskValidator.isTaskValid(task)) {
             logger.debug("BAD SOCKET REQUEST: " + task);
             throw new IllegalArgumentException("Bad value, must have length between 1 and 20");
         }
-        Date createdAt = new Date();
         taskMapper.addTask(task, task.getValue(), task.getTime(), createdAt);
-        task.setCreatedAt(createdAt);
         taskMapper.submitTaskForBackgroundExecution(task.getId());
         broadcastChange();
     }

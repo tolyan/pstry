@@ -33,6 +33,7 @@ public class APIController {
                 .fromCurrentRequest().path("/{id}")
                 .buildAndExpand(STUB_ID).toUri();
         Date createdAt = new Date();
+        task.setCreatedAt(createdAt);
         logger.debug("RECIVED: " + task);
         if (!TaskValidator.isTaskValid(task)) {
             logger.debug("BAD REST REQUEST: " + task);
@@ -40,7 +41,6 @@ public class APIController {
         }
         taskMapper.addTask(task, task.getValue(), task.getTime(), createdAt);
         taskMapper.submitTaskForBackgroundExecution(task.getId());
-        task.setCreatedAt(createdAt);
         return ResponseEntity.created(location).build();
     }
 
