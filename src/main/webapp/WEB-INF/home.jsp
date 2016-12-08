@@ -79,7 +79,7 @@
     };
 
     // Callback function to be called when stomp client could not connect to server
-    var errorCallback = function(error) {
+    //var errorCallback = function(error) {
       alert(error.headers.message);
     };
 
