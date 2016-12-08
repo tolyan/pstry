@@ -1,7 +1,9 @@
 package com.maxilect.pstry;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers;
+import com.fasterxml.jackson.databind.ser.std.DateSerializer;
 import com.maxilect.pstry.util.Constants;
 
 import java.io.Serializable;
@@ -13,20 +15,12 @@ public class Task implements Serializable {
     private Long id;
     private String value;
     @JsonDeserialize(using = DateDeserializers.DateDeserializer.class)
+    @JsonSerialize(using = DateSerializer.class)
     private Date time;
     @JsonDeserialize(using = DateDeserializers.DateDeserializer.class)
+    @JsonSerialize(using = DateSerializer.class)
     private Date createdAt;
-
-    public Task() {
-
-    }
-
-    public Task(Long id, String value, Date time, Date createdAt) {
-        this.value = value;
-        this.id = id;
-        this.time = time;
-        this.createdAt = createdAt;
-    }
+    private String result;
 
     private String getTimeStr(Date time) {
         if (time == null) {
@@ -34,7 +28,6 @@ public class Task implements Serializable {
         }
         return Constants.YYYY_MM_DD_HH_MM_SSS.get().format(time);
     }
-
 
     public Long getId() {
         return id;
@@ -53,23 +46,35 @@ public class Task implements Serializable {
     }
 
     @JsonDeserialize(using = DateDeserializers.DateDeserializer.class)
+    @JsonSerialize(using = DateSerializer.class)
     public Date getTime() {
         return time;
     }
 
     @JsonDeserialize(using = DateDeserializers.DateDeserializer.class)
+    @JsonSerialize(using = DateSerializer.class)
     public void setTime(Date time) {
         this.time = time;
     }
 
     @JsonDeserialize(using = DateDeserializers.DateDeserializer.class)
+    @JsonSerialize(using = DateSerializer.class)
     public Date getCreatedAt() {
         return createdAt;
     }
 
     @JsonDeserialize(using = DateDeserializers.DateDeserializer.class)
+    @JsonSerialize(using = DateSerializer.class)
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
     }
 
     @Override
@@ -79,9 +84,11 @@ public class Task implements Serializable {
                 .append(id)
                 .append(", value=")
                 .append(value)
+                .append(", result=")
+                .append(result)
                 .append(", time=")
                 .append(getTimeStr(time))
-                .append(", createAt=")
+                .append(", createdAt=")
                 .append(getTimeStr(createdAt))
                 .append("]")
                 .toString();

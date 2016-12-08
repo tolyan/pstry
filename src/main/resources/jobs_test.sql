@@ -52,7 +52,7 @@ IS
     BEGIN
       SELECT listagg(value, '')
       WITHIN GROUP (
-        ORDER BY id)
+        ORDER BY created_at DESC)
       INTO concatenatedValue
       FROM task
       WHERE ROWNUM <= 3;
