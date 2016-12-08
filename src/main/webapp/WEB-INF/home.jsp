@@ -9,7 +9,7 @@
 
   <table id='jqGrid'></table>
 
-  <div class="time-selector"></div>
+  <div id="time-selector" class="time-selector"></div>
   <p><span class="time-span"></span></p>
   <p class="new">
     Task: <input type="text" class="content"/>
@@ -17,10 +17,10 @@
   </p>
 
 
-  <p id="cTask">Current Task: </p>
-  <p id="createdAt">Created at: </p>
-  <p id="scheduledAt">Scheduled at: </p>
-  <p id="Result">Result: </p>
+  <p id="cTask" class="infoLabel">Current Task: </p>
+  <p id="createdAt" class="infoLabel">Created at: </p>
+  <p id="scheduledAt" class="infoLabel">Scheduled at: </p>
+  <p id="Result" class="infoLabel">Result: </p>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/themes/redmond/jquery-ui.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.13.5/css/ui.jqgrid.min.css">
@@ -111,7 +111,8 @@
                 alert("Ivalid schedule time. \n5 minute range in future is allowed only.");
                 return false;
             }
-            var package = JSON.stringify({ "time": time,"value": value});
+
+            var package = JSON.stringify({"time": time,"value": value});
             $.ajax({
                 url: "/taskmanager/task",
                 type: "POST",
@@ -120,6 +121,9 @@
                 success: function(data, textStatus, request){
                     loc = request.getResponseHeader('location');
                     file = URI(loc).filename();
+                    raw = JSON.parse(package);
+                    raw.createdAt = new Date();
+                    renderTask(raw);
                     stompClient.subscribe("topic/result/".concat(file), renderTask);
                     console.log("Scheduled task with id: ".concat(file));
                 },
@@ -154,19 +158,11 @@
 
     // Render task data from server into HTML, registered as callback
     // when subscribing to task topic
-    function renderTask(frame) {
-      var tasks = JSON.parse(frame.body);
-      $('#task').empty();
-      for(var i in tasks) {
-        var task = tasks[i];
-        $('#task').append(
-          $('<tr>').append(
-            $('<td>').html(task.id),
-            $('<td>').html(task.value),
-            $('<td>').html(task.time)
-          )
-        );
-      }
+    function renderTask(raw) {
+      $('#cTask').append(raw.value);
+      $('#createdAt').append(raw.createdAt);
+      $('#scheduledAt').append(raw.time);
+      $('#result').append(raw.result);
     }
 
 

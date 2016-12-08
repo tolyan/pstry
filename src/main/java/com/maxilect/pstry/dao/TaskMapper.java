@@ -30,4 +30,8 @@ public interface TaskMapper {
             "result from Task task  left JOIN Result result on result.task_id = task.id order by task.created_at " +
             "DESC) where rownum <= #{latestTasksCount}")
     List<Task> getLatestTasks(@Param("latestTasksCount") int latestTasksCount);
+
+    @Select("select task.id, task.value, task.time, taskcreated_at as createdAT, result.value as result from task join result" +
+            "on result.task_id = task.id where rowid=#{rowid}")
+    Task getTask(@Param("rowid") String rowId);
 }

@@ -98,6 +98,9 @@ public class SocketController {
                         logger.debug("Row descriptions: " + query.toString());
                         for (TableChangeDescription tab : query.getTableChangeDescription()) {
                             for (RowChangeDescription row : tab.getRowChangeDescription()) {
+                                logger.debug("ROW_ID:" + row.getRowid().stringValue());
+                                Task solvedTask = taskMapper.getTask(row.getRowid().stringValue());
+                                template.convertAndSend("topic/result/" + solvedTask.getId(), solvedTask);
                                 Long rowId = parseRowIdAsLong(row);
                                 logger.debug("ROW_ID: " + rowId);
 
