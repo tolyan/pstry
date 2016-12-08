@@ -29,9 +29,6 @@ public class APIController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/task")
     ResponseEntity<?> addTask(@RequestBody Task task) {
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{id}")
-                .buildAndExpand(STUB_ID).toUri();
         Date createdAt = new Date();
         task.setCreatedAt(createdAt);
         logger.debug("RECIVED: " + task);
@@ -41,6 +38,9 @@ public class APIController {
         }
         taskMapper.addTask(task, task.getValue(), task.getTime(), createdAt);
         taskMapper.submitTaskForBackgroundExecution(task.getId());
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest().path("/{id}")
+                .buildAndExpand(task.getId()).toUri();
         return ResponseEntity.created(location).build();
     }
 
