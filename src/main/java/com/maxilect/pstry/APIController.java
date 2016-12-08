@@ -6,6 +6,7 @@ package com.maxilect.pstry;
 
 import com.maxilect.pstry.dao.ResultMapper;
 import com.maxilect.pstry.dao.TaskMapper;
+import com.maxilect.pstry.validator.TaskValidator;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,10 @@ public class APIController {
                 .buildAndExpand(STUB_ID).toUri();
         Date createdAt = new Date();
         logger.debug("RECIVED: " + task);
+        if (!TaskValidator.isTaskValid(task)) {
+            logger.debug("BAD REST REQUEST: " + task);
+            return ResponseEntity.badRequest().build();
+        }
         taskMapper.addTask(task, task.getValue(), task.getTime(), createdAt);
         taskMapper.submitTaskForBackgroundExecution(task.getId());
         task.setCreatedAt(createdAt);

@@ -88,7 +88,7 @@
 
     // Register handler for add button
     $(document).ready(function() {
-      $('#time').timeEntry();
+      //$('#time').timeEntry();
 
       $('.add').click(function(e){
             var value = $('.new .content').val();

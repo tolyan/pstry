@@ -1,6 +1,11 @@
 package com.maxilect.pstry;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.DateDeserializers;
+import com.fasterxml.jackson.databind.ser.std.DateSerializer;
 import com.maxilect.pstry.util.Constants;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -9,9 +14,12 @@ public class Task implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private Long id;
-    private String value = "";
-    private Date time = new Date();
-    private Date createdAt = new Date();
+    private String value;
+    @DateTimeFormat()
+    private Date time;
+    @JsonSerialize(using = DateSerializer.class)
+    @JsonDeserialize(using = DateDeserializers.DateDeserializer.class)
+    private Date createdAt;
 
     public Task() {
 
@@ -24,7 +32,10 @@ public class Task implements Serializable {
         this.createdAt = createdAt;
     }
 
-    public String getTimeStr(Date time) {
+    private String getTimeStr(Date time) {
+        if (time == null) {
+            return null;
+        }
         return Constants.YYYY_MM_DD_HH_MM_SSS.get().format(time);
     }
 

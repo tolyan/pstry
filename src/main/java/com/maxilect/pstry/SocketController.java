@@ -2,6 +2,7 @@ package com.maxilect.pstry;
 
 import com.maxilect.pstry.dao.ResultMapper;
 import com.maxilect.pstry.dao.TaskMapper;
+import com.maxilect.pstry.validator.TaskValidator;
 import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OracleDriver;
 import oracle.jdbc.OracleStatement;
@@ -23,10 +24,7 @@ import javax.annotation.PostConstruct;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Random;
+import java.util.*;
 
 @Controller
 public class SocketController {
@@ -55,7 +53,13 @@ public class SocketController {
      */
     @MessageMapping("/addTask")
     public void addTask(Task task) throws Exception {
-        taskMapper.addTask(task, task.getValue(), task.getTime(), task.getCreatedAt());
+        if (!TaskValidator.isTaskValid(task)) {
+            logger.debug("BAD SOCKET REQUEST: " + task);
+            throw new IllegalArgumentException("Bad value, must have length between 1 and 20");
+        }
+        Date createdAt = new Date();
+        taskMapper.addTask(task, task.getValue(), task.getTime(), createdAt);
+        task.setCreatedAt(createdAt);
         taskMapper.submitTaskForBackgroundExecution(task.getId());
         broadcastChange();
     }
