@@ -49,14 +49,21 @@ CREATE OR REPLACE PROCEDURE calculateResult(taskId IN NUMBER)
 IS
   BEGIN
     DECLARE concatenatedValue VARCHAR2(250);
+      currentValue VARCHAR2(250);
     BEGIN
+      select value into currentValue from task WHERE id = taskId;
       SELECT listagg(value, '')
       WITHIN GROUP (
-        ORDER BY created_at DESC)
+        ORDER BY created_at ASC)
       INTO concatenatedValue
-      FROM task
-      WHERE ROWNUM <= 3;
-      INSERT INTO result (task_id, value) VALUES (taskId, concatenatedValue);
+      FROM (SELECT
+              value,
+              created_at
+            FROM task
+            where id <> taskId
+            ORDER BY created_at DESC)
+      WHERE rownum <= 3;
+      INSERT INTO result (task_id, value) VALUES (taskId, concatenatedValue || currentValue);
     END;
   END;
 
