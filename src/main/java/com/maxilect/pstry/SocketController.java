@@ -2,6 +2,7 @@ package com.maxilect.pstry;
 
 import com.maxilect.pstry.dao.ResultMapper;
 import com.maxilect.pstry.dao.TaskMapper;
+import com.maxilect.pstry.validator.TaskValidator;
 import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OracleDriver;
 import oracle.jdbc.OracleStatement;
@@ -13,8 +14,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -24,9 +23,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.Random;
 
 @Controller
 public class SocketController {
@@ -34,9 +33,7 @@ public class SocketController {
     final static Logger logger = Logger.getLogger(SocketController.class);
     @Autowired
     private SimpMessagingTemplate template;
-    private TaskScheduler scheduler = new ConcurrentTaskScheduler();
     private List<Task> tasks = new ArrayList<Task>();
-    private Random rand = new Random(System.currentTimeMillis());
     @Autowired
     private BasicDataSource ds;
 
@@ -55,7 +52,15 @@ public class SocketController {
      */
     @MessageMapping("/addTask")
     public void addTask(Task task) throws Exception {
-        taskMapper.addTask(task, task.getValue(), task.getTime(), task.getCreatedAt());
+        Date createdAt = new Date();
+        if (task != null) {
+            task.setCreatedAt(createdAt);
+        }
+        if (!TaskValidator.isTaskValid(task)) {
+            logger.debug("BAD SOCKET REQUEST: " + task);
+            throw new IllegalArgumentException("Bad value, must have length between 1 and 20");
+        }
+        taskMapper.addTask(task, task.getValue(), task.getTime(), createdAt);
         taskMapper.submitTaskForBackgroundExecution(task.getId());
         broadcastChange();
     }
