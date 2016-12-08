@@ -82,12 +82,17 @@ public class SocketController {
         conProp.setProperty("password", ds.getPassword());
         OracleDriver driver = new OracleDriver();
         try {
-            logger.debug("TRY: " + ds.getUrl() + ":" + ds.getUsername() + ":" + ds.getPassword());
+
+            logger.debug(new StringBuilder("Connecting to DB: ")
+                    .append(ds.getUrl()).append(":")
+                    .append(ds.getUsername()).append(":")
+                    .append(ds.getPassword()));
             connection = (OracleConnection) driver.connect(ds.getUrl(), conProp);
             changeRegistration = connection.registerDatabaseChangeNotification(buildProperties());
             changeRegistration.addListener(new DatabaseChangeListener() {
                 @Override
                 public void onDatabaseChangeNotification(DatabaseChangeEvent databaseChangeEvent) {
+                    logger.debug("NOTIFICATION EVENT");
                     broadcastChange();
                 }
             });
@@ -105,7 +110,7 @@ public class SocketController {
             }
             logger.debug("CLOSING SET");
             rs.close();
-            logger.debug("CLOSING STATE");
+            logger.debug("CLOSING STATEMENT");
             stm.close();
 
         } catch (SQLException e) {
