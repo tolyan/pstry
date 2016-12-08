@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -35,8 +33,8 @@ public class APIController {
                 .buildAndExpand(STUB_ID).toUri();
         Date createdAt = new Date();
         logger.debug("RECIVED: " + task);
-        Calendar calendar = Calendar.getInstance();
-        taskMapper.addTask(task.getValue(), task.getTime(), createdAt);
+        taskMapper.addTask(task, task.getValue(), task.getTime(), createdAt);
+        taskMapper.submitTaskForBackgroundExecution(task.getId());
         task.setCreatedAt(createdAt);
         return ResponseEntity.created(location).build();
     }
@@ -48,10 +46,7 @@ public class APIController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/task/latest")
     List<Task> getLatestTasks() {
-//        List<Task> result = new ArrayList<>();
-//        result.add(new Task(2l, "anothertask", new Date(), new Date()));
-//        return result;
-        List<Task> result =  taskMapper.getLatestTasks(7);
+        List<Task> result = taskMapper.getLatestTasks(7);
         return result;
     }
 
