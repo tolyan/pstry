@@ -14,8 +14,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -24,7 +22,10 @@ import javax.annotation.PostConstruct;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
 
 @Controller
 public class SocketController {
@@ -32,9 +33,7 @@ public class SocketController {
     final static Logger logger = Logger.getLogger(SocketController.class);
     @Autowired
     private SimpMessagingTemplate template;
-    private TaskScheduler scheduler = new ConcurrentTaskScheduler();
     private List<Task> tasks = new ArrayList<Task>();
-    private Random rand = new Random(System.currentTimeMillis());
     @Autowired
     private BasicDataSource ds;
 
