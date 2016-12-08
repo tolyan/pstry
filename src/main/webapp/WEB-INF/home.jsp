@@ -60,6 +60,11 @@
             url: "/taskmanager/task/latest"
         }).then(function(data) {
                 var json = data;
+                for(var i in json)
+                {
+                    json[i].time = new Date(json[i].time);
+                    json[i].createdAt = new Date(json[i].createdAt);
+                }
                 $("#jqGrid").jqGrid({
                             data: json,
                             datatype: "local",
@@ -107,6 +112,7 @@
             });
           });
     });
+
 
     function updateGrid() {
         $.ajax({
