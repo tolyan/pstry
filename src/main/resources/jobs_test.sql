@@ -54,7 +54,7 @@ IS
       select value into currentValue from task WHERE id = taskId;
       SELECT listagg(value, '')
       WITHIN GROUP (
-        ORDER BY created_at DESC)
+        ORDER BY created_at ASC)
       INTO concatenatedValue
       FROM (SELECT
               value,
@@ -63,7 +63,7 @@ IS
             where id <> taskId
             ORDER BY created_at DESC)
       WHERE rownum <= 3;
-      INSERT INTO result (task_id, value) VALUES (taskId, currentValue || concatenatedValue);
+      INSERT INTO result (task_id, value) VALUES (taskId, concatenatedValue || currentValue);
     END;
   END;
 
