@@ -21,7 +21,6 @@ import java.util.List;
 public class APIController {
     final static Logger logger = Logger.getLogger(APIController.class);
 
-    private static final Long STUB_ID = 1l;
     @Autowired
     private TaskMapper taskMapper;
     @Autowired
