@@ -13,10 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.annotation.PostConstruct;
+import javax.xml.bind.DatatypeConverter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -92,14 +94,16 @@ public class SocketController {
                 @Override
                 public void onDatabaseChangeNotification(DatabaseChangeEvent databaseChangeEvent) {
                     logger.debug("NOTIFICATION EVENT: " + databaseChangeEvent.toString());
-                    logger.debug("Table events: " + databaseChangeEvent.getTableChangeDescription());
-//                    for(TableChangeDescription tab : databaseChangeEvent.getTableChangeDescription()){
-//                        logger.debug("Row descriptions: " + tab.getRowChangeDescription());
-//                        for(RowChangeDescription row : tab.getRowChangeDescription()){
-//                            logger.debug("ROW_ID: " + row.getRowid());
-//                        }
-//                    }
+                    for (QueryChangeDescription query : databaseChangeEvent.getQueryChangeDescription()) {
+                        logger.debug("Row descriptions: " + query.toString());
+                        for (TableChangeDescription tab : query.getTableChangeDescription()) {
+                            for (RowChangeDescription row : tab.getRowChangeDescription()) {
+                                Long rowId = parseRowIdAsLong(row);
+                                logger.debug("ROW_ID: " + rowId);
 
+                            }
+                        }
+                    }
                     broadcastChange();
                 }
             });
@@ -131,6 +135,17 @@ public class SocketController {
                     throw new RuntimeException(e);
                 }
         }
+    }
+
+    private Long parseRowIdAsLong(RowChangeDescription row) {
+        //NOTE RowId has a form like AAAE5OAABAAAK/pAAH
+        // last 3 symbols represent row identifier, encoded in base64
+        String rowIdAsString = row.getRowid().stringValue();
+        String rowIdPart = rowIdAsString.substring(rowIdAsString.length() - 3, rowIdAsString
+                .length());
+        byte[] rowIdAsBytes = Base64Utils.decodeFromString("A" + rowIdPart);//NOTE append A to make a valid base64 str
+        String rowIdAsHex = DatatypeConverter.printHexBinary(rowIdAsBytes);
+        return Long.valueOf(rowIdAsHex);
     }
 
     private Properties buildProperties() {
