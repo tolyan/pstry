@@ -3,6 +3,8 @@ package com.maxilect.pstry;
 import com.maxilect.pstry.dao.ResultMapper;
 import com.maxilect.pstry.dao.TaskMapper;
 import oracle.jdbc.OracleConnection;
+import oracle.jdbc.OracleDriver;
+import oracle.jdbc.OracleStatement;
 import oracle.jdbc.dcn.DatabaseChangeEvent;
 import oracle.jdbc.dcn.DatabaseChangeListener;
 import oracle.jdbc.dcn.DatabaseChangeRegistration;
@@ -16,9 +18,12 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 
 import javax.annotation.PostConstruct;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -41,7 +46,8 @@ public class SocketController {
     @Autowired
     private ResultMapper resultMapper;
 
-    private void updateTaskAndBroadcast() {
+    private void broadcastChange() {
+        tasks = taskMapper.getLatestTasks(7);
         template.convertAndSend("/topic/tasks", tasks);
     }
 
@@ -49,11 +55,9 @@ public class SocketController {
      * Handler to add one task
      */
     @MessageMapping("/addTask")
-    public void addStock(Task task) throws Exception {
-        //TODO add proper logic
-//    tasks.add(new Task(1l, "taskvalue", new Date(), new Date()));
-        tasks = taskMapper.getLatestTasks(7);
-        updateTaskAndBroadcast();
+    public void addTask(Task task) throws Exception {
+        taskMapper.addTask(task.getValue(), task.getTime(), task.getCreatedAt());
+        broadcastChange();
     }
 
 
@@ -66,22 +70,49 @@ public class SocketController {
     }
 
     @PostConstruct
-    public void registerNotification() throws SQLException {
+    public void registerNotification() {
         OracleConnection connection = null;
         DatabaseChangeRegistration changeRegistration = null;
+        Properties conProp = new Properties();
+        conProp.setProperty("user", ds.getUsername());
+        conProp.setProperty("password", ds.getPassword());
+        OracleDriver driver = new OracleDriver();
         try {
-            connection = (OracleConnection) ds.getConnection();
+            logger.debug("TRY: " + ds.getUrl() + ":" +ds.getUsername() + ":" + ds.getPassword());
+            connection = (OracleConnection) driver.connect(ds.getUrl(), conProp);
             changeRegistration = connection.registerDatabaseChangeNotification(buildProperties());
             changeRegistration.addListener(new DatabaseChangeListener() {
                 @Override
                 public void onDatabaseChangeNotification(DatabaseChangeEvent databaseChangeEvent) {
-                    //do main staff here
+                    broadcastChange();
                 }
             });
+
+            Statement stm = connection.createStatement();
+            ((OracleStatement)stm).setDatabaseChangeRegistration(changeRegistration);
+            logger.debug("RUNNING STATEMENT");
+            stm.setQueryTimeout(1);
+            ResultSet rs = stm.executeQuery("select * from result");
+            while (rs.next()){}
+            String [] tables = changeRegistration.getTables();
+            for(int i = 0; i < tables.length; i++){
+                logger.debug("Registred table: " + tables[i]);
+            }
+            logger.debug("CLOSING SET");
+            rs.close();
+            logger.debug("CLOSING STATE");
+            stm.close();
+
         } catch (SQLException e) {
+            logger.warn("Couldn't register notificator " + e.getMessage());
             if (connection != null)
-                connection.unregisterDatabaseChangeNotification(changeRegistration);
-            throw new RuntimeException(e);
+                try {
+                    connection.unregisterDatabaseChangeNotification(changeRegistration);
+                } catch (SQLException e1) {
+                    logger.warn(e1.getMessage());
+                } finally {
+                    throw new RuntimeException(e);
+                }
         }
     }
 
