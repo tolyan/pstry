@@ -101,9 +101,6 @@ public class SocketController {
                                 logger.debug("ROW_ID:" + row.getRowid().stringValue());
                                 Task solvedTask = taskMapper.getTask(row.getRowid().stringValue());
                                 template.convertAndSend("topic/result/" + solvedTask.getId(), solvedTask);
-                                Long rowId = parseRowIdAsLong(row);
-                                logger.debug("ROW_ID: " + rowId);
-
                             }
                         }
                     }
@@ -138,17 +135,6 @@ public class SocketController {
                     throw new RuntimeException(e);
                 }
         }
-    }
-
-    private Long parseRowIdAsLong(RowChangeDescription row) {
-        //NOTE RowId has a form like AAAE5OAABAAAK/pAAH
-        // last 3 symbols represent row identifier, encoded in base64
-        String rowIdAsString = row.getRowid().stringValue();
-        String rowIdPart = rowIdAsString.substring(rowIdAsString.length() - 3, rowIdAsString
-                .length());
-        byte[] rowIdAsBytes = Base64Utils.decodeFromString("A" + rowIdPart);//NOTE append A to make a valid base64 str
-        String rowIdAsHex = DatatypeConverter.printHexBinary(rowIdAsBytes);
-        return Long.valueOf(rowIdAsHex);
     }
 
     private Properties buildProperties() {

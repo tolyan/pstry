@@ -31,7 +31,7 @@ public interface TaskMapper {
             "DESC) where rownum <= #{latestTasksCount}")
     List<Task> getLatestTasks(@Param("latestTasksCount") int latestTasksCount);
 
-    @Select("select task.id, task.value, task.time, taskcreated_at as createdAT, result.value as result from task join result" +
-            "on result.task_id = task.id where rowid=#{rowid}")
+    @Select("select task.id, task.value, task.time, task.created_at as createdAt, result.value as result from task join result " +
+            "on result.task_id = task.id where result.rowid=#{rowid}")
     Task getTask(@Param("rowid") String rowId);
 }
