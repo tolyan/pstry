@@ -63,11 +63,13 @@
                 $("#jqGrid").jqGrid({
                             data: json,
                             datatype: "local",
-                            colNames: [ "id", "value", "timeStr"],
+                            colNames: [ "ID", "Task", "Created at", "Scheduled at", "Result"],
                             colModel: [
-                                { name: "ID", width:300 ,height:"auto"},
-                                { name: "value", width: 150, align: "right",height:"auto" },
-                                { name: "timeStr", width: 100, align: "right" ,height:"auto"}
+                                { name: "id", width:40 ,height:"auto"},
+                                { name: "value", width: 350, align: "right",height:"auto" },
+                                { name: "createdAt", width: 200, align: "right" ,height:"auto"},
+                                { name: "time", width: 200, align: "right" ,height:"auto"},
+                                { name: "result", width: 200, align: "right" ,height:"auto"}
                             ],
                             rowNum:7,
                             rownumbers:true,
@@ -79,21 +81,30 @@
         });
 
         $('.add').click(function(e){
-                var time = timeselector.datetimepicker('getDate');
-                var value = $('.new .content').val();
-                $.ajax({
-                    url: "/taskmanager/task",
-                    type: "POST",
-                    contentType: "application/json",
-                    dataType: "json",
-                    data: JSON.stringify({ 'time': time,'value': value}),
-                    success: function(){
-                        alert("Task scheduled.");
-                    },
-                    error: function(){
-                        alert("Service unavailable.");
-                    }
-                });
+            var time = timeselector.datetimepicker('getDate');
+            var curr = new Date();
+            var allowed = new Date(time + 5*60000);
+            var value = $('.new .content').val();
+            if (value.length > 20) {
+                alert("Task length exceeded maximum.\n Current maxim length is 20.");
+                return false;
+            } else if (time < allowed.getTime() && time < curr) {
+                alert("Ivalid schedule time. \n5 minute range in future is allowed only.");
+                return false;
+            }
+            $.ajax({
+                url: "/taskmanager/task",
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({ 'time': time,'value': value}),
+                success: function(){
+                    alert("Task scheduled.");
+                },
+                error: function(){
+                    alert("Service unavailable.");
+                }
+            });
           });
     });
 
