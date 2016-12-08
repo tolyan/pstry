@@ -71,9 +71,9 @@
                             colNames: [ "ID", "Task", "Created at", "Scheduled at", "Result"],
                             colModel: [
                                 { name: "id", width:40 ,height:"auto"},
-                                { name: "value", width: 350, align: "right",height:"auto" },
-                                { name: "createdAt", width: 200, align: "right" ,height:"auto"},
-                                { name: "time", width: 200, align: "right" ,height:"auto"},
+                                { name: "value", width: 200, align: "right",height:"auto" },
+                                { name: "createdAt", width: 350, align: "right" ,height:"auto"},
+                                { name: "time", width: 350, align: "right" ,height:"auto"},
                                 { name: "result", width: 200, align: "right" ,height:"auto"}
                             ],
                             rowNum:7,
@@ -120,6 +120,11 @@
         }).then(function(data) {
            var $grid = $("#jqGrid"),
            p = $grid.jqGrid("getGridParam");
+           for(var i in data)
+           {
+               data[i].time = new Date(data[i].time);
+               data[i].createdAt = new Date(data[i].createdAt);
+           }
            p.data = data;
            $grid.trigger("reloadGrid", [{current: true}]);
         });
