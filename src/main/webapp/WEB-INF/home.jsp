@@ -17,10 +17,10 @@
   </p>
 
 
-  <p>Current Task: </p>
-  <p>Created at: </p>
-  <p>Scheduled at: </p>
-  <p>Result: </p>
+  <p id="cTask">Current Task: </p>
+  <p id="createdAt">Created at: </p>
+  <p id="scheduledAt">Scheduled at: </p>
+  <p id="Result">Result: </p>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/themes/redmond/jquery-ui.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.13.5/css/ui.jqgrid.min.css">
@@ -35,19 +35,33 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.13.5/js/jquery.jqgrid.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-sliderAccess.js"></script>
-  <script src="${pageContext.request.contextPath}/resources/jqCron.js"></script>
-  <script src="${pageContext.request.contextPath}/resources/jqCron.en.js"></script>
+  <script src="${pageContext.request.contextPath}/resources/URI.js"></script>
 
   <script>
+  //Create stomp client over sockJS protocol
+  var socket = new SockJS("/taskmanager/ws");
+  var stompClient = Stomp.over(socket);
 
+  // Callback function to be called when stomp client is connected to server
+  var connectCallback = function() {
+    stompClient.subscribe('/topic/tasks', updateGrid);
+  };
 
+  // Callback function to be called when stomp client could not connect to server
+  var errorCallback = function(error) {
+    console.log(error);
+    alert("Service unavailable.");
+  };
+
+  // Connect to server via websocket
+  stompClient.connect("guest", "guest", connectCallback, errorCallback);
 
     $( document ).ready(function() {
         var curr = new Date();
         var allowed = new Date(curr.getTime() + 5*60000);
         var timeselector = $('.time-selector');
         timeselector.datetimepicker({
-            timeFormat: "hh:mm:ss",
+            timeFormat: "HH:mm:ss",
             hour: curr.getHours(),
             minute: curr.getMinutes(),
             second: curr.getSeconds(),
@@ -97,16 +111,21 @@
                 alert("Ivalid schedule time. \n5 minute range in future is allowed only.");
                 return false;
             }
+            var package = JSON.stringify({ "time": time,"value": value});
             $.ajax({
                 url: "/taskmanager/task",
                 type: "POST",
                 contentType: "application/json",
-                dataType: "json",
-                data: JSON.stringify({ 'time': time,'value': value}),
-                success: function(){
-                    alert("Task scheduled.");
+                data: package,
+                success: function(data, textStatus, request){
+                    loc = request.getResponseHeader('location');
+                    file = URI(loc).filename();
+                    stompClient.subscribe("topic/result/".concat(file), renderTask);
+                    console.log("Scheduled task with id: ".concat(file));
                 },
-                error: function(){
+                error: function(jqXHR, textStatus, errorThrown ){
+                    console.log("Error for string ".concat(textStatus)
+                                .concat(", ").concat(errorThrown));
                     alert("Service unavailable.");
                 }
             });
@@ -131,9 +150,7 @@
     }
 
 
-    //Create stomp client over sockJS protocol
-    var socket = new SockJS("/taskmanager/ws");
-    var stompClient = Stomp.over(socket);
+
 
     // Render task data from server into HTML, registered as callback
     // when subscribing to task topic
@@ -152,19 +169,7 @@
       }
     }
 
-    // Callback function to be called when stomp client is connected to server
-    var connectCallback = function() {
-      stompClient.subscribe('/topic/tasks', updateGrid);
-      stompClient.subscribe('/topic/tasks', renderTask);
-    };
 
-    // Callback function to be called when stomp client could not connect to server
-    var errorCallback = function(error) {
-      alert(error.headers.message);
-    };
-
-    // Connect to server via websocket
-    stompClient.connect("guest", "guest", connectCallback, errorCallback);
 
   </script>
 </body>

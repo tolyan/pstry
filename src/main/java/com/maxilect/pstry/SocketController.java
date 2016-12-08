@@ -6,9 +6,7 @@ import com.maxilect.pstry.validator.TaskValidator;
 import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OracleDriver;
 import oracle.jdbc.OracleStatement;
-import oracle.jdbc.dcn.DatabaseChangeEvent;
-import oracle.jdbc.dcn.DatabaseChangeListener;
-import oracle.jdbc.dcn.DatabaseChangeRegistration;
+import oracle.jdbc.dcn.*;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +91,15 @@ public class SocketController {
             changeRegistration.addListener(new DatabaseChangeListener() {
                 @Override
                 public void onDatabaseChangeNotification(DatabaseChangeEvent databaseChangeEvent) {
-                    logger.debug("NOTIFICATION EVENT");
+                    logger.debug("NOTIFICATION EVENT: " + databaseChangeEvent.toString());
+                    logger.debug("Table events: " + databaseChangeEvent.getTableChangeDescription());
+//                    for(TableChangeDescription tab : databaseChangeEvent.getTableChangeDescription()){
+//                        logger.debug("Row descriptions: " + tab.getRowChangeDescription());
+//                        for(RowChangeDescription row : tab.getRowChangeDescription()){
+//                            logger.debug("ROW_ID: " + row.getRowid());
+//                        }
+//                    }
+
                     broadcastChange();
                 }
             });
