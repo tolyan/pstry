@@ -18,7 +18,6 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.context.support.StaticWebApplicationContext;
 
 import javax.annotation.PostConstruct;
 import java.sql.ResultSet;
@@ -56,7 +55,8 @@ public class SocketController {
      */
     @MessageMapping("/addTask")
     public void addTask(Task task) throws Exception {
-        taskMapper.addTask(task.getValue(), task.getTime(), task.getCreatedAt());
+        taskMapper.addTask(task, task.getValue(), task.getTime(), task.getCreatedAt());
+        taskMapper.submitTaskForBackgroundExecution(task.getId());
         broadcastChange();
     }
 
@@ -78,7 +78,7 @@ public class SocketController {
         conProp.setProperty("password", ds.getPassword());
         OracleDriver driver = new OracleDriver();
         try {
-            logger.debug("TRY: " + ds.getUrl() + ":" +ds.getUsername() + ":" + ds.getPassword());
+            logger.debug("TRY: " + ds.getUrl() + ":" + ds.getUsername() + ":" + ds.getPassword());
             connection = (OracleConnection) driver.connect(ds.getUrl(), conProp);
             changeRegistration = connection.registerDatabaseChangeNotification(buildProperties());
             changeRegistration.addListener(new DatabaseChangeListener() {
@@ -89,13 +89,14 @@ public class SocketController {
             });
 
             Statement stm = connection.createStatement();
-            ((OracleStatement)stm).setDatabaseChangeRegistration(changeRegistration);
+            ((OracleStatement) stm).setDatabaseChangeRegistration(changeRegistration);
             logger.debug("RUNNING STATEMENT");
             stm.setQueryTimeout(1);
             ResultSet rs = stm.executeQuery("select * from result");
-            while (rs.next()){}
-            String [] tables = changeRegistration.getTables();
-            for(int i = 0; i < tables.length; i++){
+            while (rs.next()) {
+            }
+            String[] tables = changeRegistration.getTables();
+            for (int i = 0; i < tables.length; i++) {
                 logger.debug("Registred table: " + tables[i]);
             }
             logger.debug("CLOSING SET");
