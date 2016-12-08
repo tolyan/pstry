@@ -1,11 +1,8 @@
 package com.maxilect.pstry;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.deser.std.DateDeserializers;
-import com.fasterxml.jackson.databind.ser.std.DateSerializer;
 import com.maxilect.pstry.util.Constants;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -15,10 +12,9 @@ public class Task implements Serializable {
     private static final long serialVersionUID = 1L;
     private Long id;
     private String value;
-    @DateTimeFormat()
+    @JsonDeserialize(using = TimestampDeserializer.class)
     private Date time;
-    @JsonSerialize(using = DateSerializer.class)
-    @JsonDeserialize(using = DateDeserializers.DateDeserializer.class)
+    @JsonDeserialize(using = TimestampDeserializer.class)
     private Date createdAt;
 
     public Task() {
@@ -56,18 +52,22 @@ public class Task implements Serializable {
         this.value = value;
     }
 
+    @JsonDeserialize(using = TimestampDeserializer.class)
     public Date getTime() {
         return time;
     }
 
+    @JsonDeserialize(using = TimestampDeserializer.class)
     public void setTime(Date time) {
         this.time = time;
     }
 
+    @JsonDeserialize(using = TimestampDeserializer.class)
     public Date getCreatedAt() {
         return createdAt;
     }
 
+    @JsonDeserialize(using = TimestampDeserializer.class)
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
