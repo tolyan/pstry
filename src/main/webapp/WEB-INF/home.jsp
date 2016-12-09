@@ -30,7 +30,7 @@
 
   <div id="time-selector" class="time-selector" align="center"></div>
   <p class="new" align="center">
-    Task: <input type="text" class="content"/>
+    Task: <input type="text" class="content" id="taskInput"/>
      <button class="add">Add</button>
   </p>
 
@@ -74,7 +74,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.13.5/css/ui.jqgrid.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.css">
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/jqCron.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.1/sockjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
@@ -150,21 +149,29 @@
 
         $('.add').click(function(e){
             var time = timeselector.datetimepicker('getDate');
+            var checkTime = new Date(time);
+
             var curr = new Date();
-            var allowed = new Date(time + 5*60000);
+            var allowed = new Date(curr.getTime() + 5*60000);
+            if (time < curr){
+                time = curr;
+            }
             var value = $('.new .content').val();
             if (value.length > 20) {
                 alert("Task length exceeded maximum.\n Current maxim length is 20.");
                 return;
-            } else if (time < allowed.getTime() && time < curr) {
-                alert("Ivalid schedule time. \n5 minute range in future is allowed only.");
+            } else if (checkTime > allowed) {
+                alert("Invalid schedule time. \n5 minute range in future is allowed.");
                 return;
             }
-
-            var package = JSON.stringify({"time": time,"value": value});
+            $('#taskInput').val("");
+            var package = JSON.stringify({"time": time,"value": value, "createdAt": curr});
+            console.log("POSTING");
+            console.log(package);
             $.ajax({
                 url: "/taskmanager/task",
                 type: "POST",
+
                 contentType: "application/json",
                 data: package,
                 success: function(data, textStatus, request){
@@ -176,10 +183,17 @@
                     stompClient.subscribe("/topic/result/".concat(file), notification);
                     console.log("Scheduled task with id: ".concat(file));
                 },
+                statusCode: {
+                    400: function (response) {
+                        alert(response.body);
+                    },
+                    503: function (response) {
+                        alert("Service unavailable");
+                    }
+                },
                 error: function(jqXHR, textStatus, errorThrown ){
                     console.log("Error for string ".concat(textStatus)
                                 .concat(", ").concat(errorThrown));
-                    alert("Service unavailable.");
                 }
             });
           });
