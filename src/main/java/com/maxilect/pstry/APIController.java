@@ -31,14 +31,14 @@ public class APIController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/task")
     ResponseEntity<?> addTask(@RequestBody Task task) {
-        Date createdAt = new Date();
-        task.setCreatedAt(createdAt);
+//        Date createdAt = new Date();
+//        task.setCreatedAt(createdAt);
         logger.debug("RECIVED: " + task);
         if (!TaskValidator.isTaskValid(task)) {
             logger.debug("BAD REST REQUEST: " + task);
             return ResponseEntity.badRequest().build();
         }
-        taskMapper.addTask(task, task.getValue(), task.getTime(), createdAt);
+        taskMapper.addTask(task, task.getValue(), task.getTime(), task.getCreatedAt());
         taskMapper.submitTaskForBackgroundExecution(task.getId());
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{id}")

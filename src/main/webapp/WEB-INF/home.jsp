@@ -74,7 +74,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.13.5/css/ui.jqgrid.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.css">
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/jqCron.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.1/sockjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
@@ -151,8 +150,12 @@
         $('.add').click(function(e){
             var time = timeselector.datetimepicker('getDate');
             var checkTime = new Date(time);
+
             var curr = new Date();
             var allowed = new Date(curr.getTime() + 5*60000);
+            if (time < curr){
+                time = curr;
+            }
             var value = $('.new .content').val();
             if (value.length > 20) {
                 alert("Task length exceeded maximum.\n Current maxim length is 20.");
@@ -162,7 +165,9 @@
                 return;
             }
             $('#taskInput').val("");
-            var package = JSON.stringify({"time": time,"value": value});
+            var package = JSON.stringify({"time": time,"value": value, "createdAt": curr});
+            console.log("POSTING");
+            console.log(package);
             $.ajax({
                 url: "/taskmanager/task",
                 type: "POST",
