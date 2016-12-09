@@ -30,7 +30,7 @@
 
   <div id="time-selector" class="time-selector" align="center"></div>
   <p class="new" align="center">
-    Task: <input type="text" class="content"/>
+    Task: <input type="text" class="content" id="taskInput"/>
      <button class="add">Add</button>
   </p>
 
@@ -150,21 +150,23 @@
 
         $('.add').click(function(e){
             var time = timeselector.datetimepicker('getDate');
+            var checkTime = new Date(time);
             var curr = new Date();
-            var allowed = new Date(time + 5*60000);
+            var allowed = new Date(curr.getTime() + 5*60000);
             var value = $('.new .content').val();
             if (value.length > 20) {
                 alert("Task length exceeded maximum.\n Current maxim length is 20.");
                 return;
-            } else if (time < allowed.getTime() && time < curr) {
-                alert("Ivalid schedule time. \n5 minute range in future is allowed only.");
+            } else if (checkTime > allowed) {
+                alert("Invalid schedule time. \n5 minute range in future is allowed.");
                 return;
             }
-
+            $('#taskInput').val("");
             var package = JSON.stringify({"time": time,"value": value});
             $.ajax({
                 url: "/taskmanager/task",
                 type: "POST",
+
                 contentType: "application/json",
                 data: package,
                 success: function(data, textStatus, request){
@@ -176,10 +178,17 @@
                     stompClient.subscribe("/topic/result/".concat(file), notification);
                     console.log("Scheduled task with id: ".concat(file));
                 },
+                statusCode: {
+                    400: function (response) {
+                        alert(response.body);
+                    },
+                    503: function (response) {
+                        alert("Service unavailable");
+                    }
+                },
                 error: function(jqXHR, textStatus, errorThrown ){
                     console.log("Error for string ".concat(textStatus)
                                 .concat(", ").concat(errorThrown));
-                    alert("Service unavailable.");
                 }
             });
           });
