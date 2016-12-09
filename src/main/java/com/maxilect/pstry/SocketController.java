@@ -134,6 +134,14 @@ public class SocketController {
                 } finally {
                     throw new RuntimeException(e);
                 }
+        } finally {
+            if(connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    logger.warn("Couldn't close connection " + e.getMessage());
+                }
+            }
         }
     }
 
