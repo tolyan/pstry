@@ -19,4 +19,9 @@
     <url-pattern>/</url-pattern>
   </servlet-mapping>
 
+  <context-param>
+    <param-name>containerSciFilter</param-name>
+    <param-value>JerseyServletContainerInitializer</param-value>
+  </context-param>
+
 </web-app>

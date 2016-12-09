@@ -3,11 +3,6 @@ package com.maxilect.pstry.validator;
 import com.maxilect.pstry.Task;
 import org.springframework.util.StringUtils;
 
-/**
- * Copyright DonRiver Inc. All Rights Reserved.
- * Created on: 08.12.16
- * Created by: Oleg Maximchuk
- */
 public class TaskValidator {
 
     private static final int MAX_STR_LENGTH = 20;

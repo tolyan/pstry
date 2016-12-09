@@ -3,24 +3,72 @@
 <html>
 <head>
 	<title>Task Manager</title>
+
+<style type="text/css">
+.wrap {
+   width:800px;
+   margin:0 auto;
+}
+.left_col {
+   align:right;
+   float:left;
+   height:30px;
+   width:400px;
+}
+.right_col {
+   aligh:left;
+   float:right;
+   height:30px;
+   width:400px;
+}
+</style>
 </head>
 <body>
   <h1>Task Manager</h1>
 
-  <table id='jqGrid'></table>
+  <table align="center" id='jqGrid'></table>
 
-  <div id="time-selector" class="time-selector"></div>
-  <p><span class="time-span"></span></p>
-  <p class="new">
+  <div id="time-selector" class="time-selector" align="center"></div>
+  <p class="new" align="center">
     Task: <input type="text" class="content"/>
      <button class="add">Add</button>
   </p>
 
+<div align="center" id="currentInfo">
+    <div class="wrap">
+        <div class="left_col">
+            Current Task:
+        </div>
+        <div class="right_col" id="cTask" >
 
-  <p id="cTask" class="infoLabel">Current Task: </p>
-  <p id="createdAt" class="infoLabel">Created at: </p>
-  <p id="scheduledAt" class="infoLabel">Scheduled at: </p>
-  <p id="Result" class="infoLabel">Result: </p>
+        </div>
+    </div>
+    <div class="wrap">
+        <div class="left_col">
+            Created at:
+        </div>
+        <div class="right_col" id="createdAt" >
+
+        </div>
+    </div>
+    <div class="wrap">
+        <div class="left_col">
+            Scheduled at:
+        </div>
+        <div class="right_col" id="scheduledAt" >
+
+        </div>
+    </div>
+    <div class="wrap">
+        <div class="left_col">
+            Result:
+        </div>
+        <div class="right_col" id="result" >
+
+        </div>
+    </div>
+</div>
+
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/themes/redmond/jquery-ui.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.13.5/css/ui.jqgrid.min.css">
@@ -36,6 +84,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.13.5/js/jquery.jqgrid.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-sliderAccess.js"></script>
   <script src="${pageContext.request.contextPath}/resources/URI.js"></script>
+  <script src="${pageContext.request.contextPath}/resources/moment-with-locales.js"></script>
 
   <script>
   //Create stomp client over sockJS protocol
@@ -76,8 +125,8 @@
                 var json = data;
                 for(var i in json)
                 {
-                    json[i].time = new Date(json[i].time);
-                    json[i].createdAt = new Date(json[i].createdAt);
+                    json[i].time = moment(new Date(json[i].time)).format();
+                    json[i].createdAt = moment(new Date(json[i].createdAt)).format();
                 }
                 $("#jqGrid").jqGrid({
                             data: json,
@@ -85,10 +134,10 @@
                             colNames: [ "ID", "Task", "Created at", "Scheduled at", "Result"],
                             colModel: [
                                 { name: "id", width:40 ,height:"auto"},
-                                { name: "value", width: 200, align: "right",height:"auto" },
+                                { name: "value", width: 400, align: "right",height:"auto" },
                                 { name: "createdAt", width: 350, align: "right" ,height:"auto"},
                                 { name: "time", width: 350, align: "right" ,height:"auto"},
-                                { name: "result", width: 200, align: "right" ,height:"auto"}
+                                { name: "result", width: 600, align: "right" ,height:"auto"}
                             ],
                             rowNum:7,
                             rownumbers:true,
@@ -106,10 +155,10 @@
             var value = $('.new .content').val();
             if (value.length > 20) {
                 alert("Task length exceeded maximum.\n Current maxim length is 20.");
-                return false;
+                return;
             } else if (time < allowed.getTime() && time < curr) {
                 alert("Ivalid schedule time. \n5 minute range in future is allowed only.");
-                return false;
+                return;
             }
 
             var package = JSON.stringify({"time": time,"value": value});
@@ -124,7 +173,7 @@
                     raw = JSON.parse(package);
                     raw.createdAt = new Date();
                     renderTask(raw);
-                    stompClient.subscribe("topic/result/".concat(file), renderTask);
+                    stompClient.subscribe("/topic/result/".concat(file), notification);
                     console.log("Scheduled task with id: ".concat(file));
                 },
                 error: function(jqXHR, textStatus, errorThrown ){
@@ -145,8 +194,8 @@
            p = $grid.jqGrid("getGridParam");
            for(var i in data)
            {
-               data[i].time = new Date(data[i].time);
-               data[i].createdAt = new Date(data[i].createdAt);
+               data[i].time = moment(new Date(data[i].time)).format();
+               data[i].createdAt = moment(new Date(data[i].createdAt)).format();
            }
            p.data = data;
            $grid.trigger("reloadGrid", [{current: true}]);
@@ -159,10 +208,21 @@
     // Render task data from server into HTML, registered as callback
     // when subscribing to task topic
     function renderTask(raw) {
+      $('.right_col').empty();
       $('#cTask').append(raw.value);
-      $('#createdAt').append(raw.createdAt);
-      $('#scheduledAt').append(raw.time);
-      $('#result').append(raw.result);
+      $('#createdAt').append(moment(new Date(raw.createdAt)).format());
+      $('#scheduledAt').append(moment(new Date(raw.time)).format());
+    }
+
+    function notification(raw) {
+        json = JSON.parse(raw.body);
+        console.log('<<< GOT message');
+        console.log(json.result);
+        $('.right_col').empty();
+        $('#cTask').append(json.value);
+        $('#createdAt').append(moment(new Date(json.createdAt)).format());
+        $('#scheduledAt').append(moment(new Date(json.time)).format());
+        $('#result').append(json.result);
     }
 
 
