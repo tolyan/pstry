@@ -26,6 +26,9 @@ public class APIController {
     @Autowired
     private ResultMapper resultMapper;
 
+    @Autowired
+    private SocketController socketController;
+
     @RequestMapping(method = RequestMethod.POST, value = "/task")
     ResponseEntity<?> addTask(@RequestBody Task task) {
         Date createdAt = new Date();
@@ -40,6 +43,7 @@ public class APIController {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{id}")
                 .buildAndExpand(task.getId()).toUri();
+        socketController.broadcastChange();
         return ResponseEntity.created(location).build();
     }
 

@@ -13,12 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.annotation.PostConstruct;
-import javax.xml.bind.DatatypeConverter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -42,7 +40,7 @@ public class SocketController {
     @Autowired
     private ResultMapper resultMapper;
 
-    private void broadcastChange() {
+    public void broadcastChange() {
         tasks = taskMapper.getLatestTasks(7);
         template.convertAndSend("/topic/tasks", tasks);
     }
@@ -100,7 +98,8 @@ public class SocketController {
                             for (RowChangeDescription row : tab.getRowChangeDescription()) {
                                 logger.debug("ROW_ID:" + row.getRowid().stringValue());
                                 Task solvedTask = taskMapper.getTask(row.getRowid().stringValue());
-                                template.convertAndSend("topic/result/" + solvedTask.getId(), solvedTask);
+                                logger.debug("SENDING task: " + solvedTask.toString());
+                                template.convertAndSend("/topic/result/" + solvedTask.getId(), solvedTask);
                             }
                         }
                     }

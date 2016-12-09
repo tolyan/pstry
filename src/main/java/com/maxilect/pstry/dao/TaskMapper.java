@@ -10,11 +10,6 @@ import org.apache.ibatis.mapping.StatementType;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Copyright DonRiver Inc. All Rights Reserved.
- * Created on: 07.12.16
- * Created by: Oleg Maximchuk
- */
 public interface TaskMapper {
 
     @Insert("INSERT INTO task(value, time, created_at) VALUES (#{value}, #{time}, #{createdAt})")

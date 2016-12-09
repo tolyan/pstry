@@ -1,7 +1,4 @@
-/**
- * Copyright © Anatoly Rybalchenko, 2016
- * a.rybalchenko@gmail.com
- */
+
 package com.maxilect.pstry;
 
 public class Result {
