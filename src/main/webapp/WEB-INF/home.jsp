@@ -28,8 +28,9 @@
 
 
   <table align="center" id='jqGrid'></table>
-  <div id="time-selector" class="time-selector" align="center"></div>
+
   <p class="new" align="center">
+    Time: <input id="time-selector" class="time-selector">
     Task: <input type="text" class="content" id="taskInput"/>
      <button class="add">Add</button>
   </p>
@@ -113,6 +114,7 @@
         timeselector.datetimepicker('setDate', (new Date()));
         timeselector.datetimepicker({
             timeFormat: "HH:mm:ss",
+            timeInput: true,
             hour: curr.getHours(),
             minute: curr.getMinutes(),
             second: curr.getSeconds(),
@@ -127,8 +129,8 @@
                 var json = data;
                 for(var i in json)
                 {
-                    json[i].time = moment(new Date(json[i].time)).format();
-                    json[i].createdAt = moment(new Date(json[i].createdAt)).format();
+                    json[i].time = moment(roundSec(new Date(json[i].time))).format();
+                    json[i].createdAt = moment(roundSec(new Date(json[i].createdAt))).format();
                 }
                 $("#jqGrid").jqGrid({
                             data: json,
@@ -170,20 +172,18 @@
                 return;
             }
             $('#taskInput').val("");
-            var package = JSON.stringify({"time": time,"value": value, "createdAt": curr});
+            var package = JSON.stringify({"time": time,"value": value, "createdAt": roundSec(curr)});
             console.log("POSTING");
             console.log(package);
             $.ajax({
                 url: "/taskmanager/task",
                 type: "POST",
-
                 contentType: "application/json",
                 data: package,
                 success: function(data, textStatus, request){
                     loc = request.getResponseHeader('location');
                     file = URI(loc).filename();
                     raw = JSON.parse(package);
-                    raw.createdAt = new Date();
                     renderTask(raw);
                     stompClient.subscribe("/topic/result/".concat(file), notification);
                     console.log("Scheduled task with id: ".concat(file));
@@ -229,8 +229,10 @@
     function renderTask(raw) {
       $('.right_col').empty();
       $('#cTask').append(raw.value);
-      $('#createdAt').append(moment(new Date(raw.createdAt)).format());
-      $('#scheduledAt').append(moment(new Date(raw.time)).format());
+      creDat = roundSec(new Date(raw.createdAt));
+      $('#createdAt').append(moment(creDat).format());
+      schDat = roundSec(new Date(raw.time));
+      $('#scheduledAt').append(moment(schDat).format());
     }
 
     function notification(raw) {
@@ -239,11 +241,16 @@
         console.log(json.result);
         $('.right_col').empty();
         $('#cTask').append(json.value);
-        $('#createdAt').append(moment(new Date(json.createdAt)).format());
-        $('#scheduledAt').append(moment(new Date(json.time)).format());
+        creDate = roundSec(new Date(json.createdAt));
+        $('#createdAt').append(moment(creDate).format());
+        schDate = roundSec(new Date(json.time));
+        $('#scheduledAt').append(moment(schDate).format());
         $('#result').append(json.result);
     }
 
+    function roundSec(date) {
+        return new Date(Math.round(date.getTime()/1000)*1000);
+    }
 
 
   </script>
