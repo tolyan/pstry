@@ -21,7 +21,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -50,15 +49,11 @@ public class SocketController {
      */
     @MessageMapping("/addTask")
     public void addTask(Task task) throws Exception {
-        Date createdAt = new Date();
-        if (task != null) {
-            task.setCreatedAt(createdAt);
-        }
         if (!TaskValidator.isTaskValid(task)) {
             logger.debug("BAD SOCKET REQUEST: " + task);
             throw new IllegalArgumentException("Bad value, must have length between 1 and 20");
         }
-        taskMapper.addTask(task, task.getValue(), task.getTime(), createdAt);
+        taskMapper.addTask(task, task.getValue(), task.getTime(), task.getCreatedAt());
         taskMapper.submitTaskForBackgroundExecution(task.getId());
         broadcastChange();
     }
@@ -134,7 +129,7 @@ public class SocketController {
                     throw new RuntimeException(e);
                 }
         } finally {
-            if(connection != null) {
+            if (connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException e) {

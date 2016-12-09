@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -31,8 +30,6 @@ public class APIController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/task")
     ResponseEntity<?> addTask(@RequestBody Task task) {
-//        Date createdAt = new Date();
-//        task.setCreatedAt(createdAt);
         logger.debug("RECIVED: " + task);
         if (!TaskValidator.isTaskValid(task)) {
             logger.debug("BAD REST REQUEST: " + task);
@@ -54,8 +51,7 @@ public class APIController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/task/latest")
     List<Task> getLatestTasks() {
-        List<Task> result = taskMapper.getLatestTasks(7);
-        return result;
+        return taskMapper.getLatestTasks(7);
     }
 
 
