@@ -47,8 +47,13 @@ public class TaskValidatorTest {
     }
 
     @Test
-    public void testMissingDate() {
-        assertFalse(TaskValidator.isTaskValid(buildTaskWithValiValue(null)));
+    public void testMissingExecDate() {
+        assertFalse(TaskValidator.isTaskValid(buildTaskWithValiValue(null, new Date())));
+    }
+
+    @Test
+    public void testMissingCreatedDate() {
+        assertFalse(TaskValidator.isTaskValid(buildTaskWithValiValue(new Date(), null)));
     }
 
     @Test
@@ -56,7 +61,7 @@ public class TaskValidatorTest {
         Calendar instance = Calendar.getInstance();
         instance.setTime(new Date());
         instance.add(Calendar.MINUTE, 5);
-        assertFalse(TaskValidator.isTaskValid(buildTaskWithValiValue(instance.getTime())));
+        assertFalse(TaskValidator.isTaskValid(buildTaskWithValiValue(instance.getTime(), new Date())));
     }
 
     private Task buildTaskWithValidDates(String value) {
@@ -67,10 +72,10 @@ public class TaskValidatorTest {
         return task;
     }
 
-    private Task buildTaskWithValiValue(Date execTime) {
+    private Task buildTaskWithValiValue(Date execTime, Date createdAt) {
         Task task = new Task();
         task.setValue("123");
-        task.setCreatedAt(new Date());
+        task.setCreatedAt(createdAt);
         task.setTime(execTime);
         return task;
     }
