@@ -26,8 +26,8 @@
 <body>
   <h1>Task Manager</h1>
 
-  <table align="center" id='jqGrid'></table>
 
+  <table align="center" id='jqGrid'></table>
   <div id="time-selector" class="time-selector" align="center"></div>
   <p class="new" align="center">
     Task: <input type="text" class="content" id="taskInput"/>
@@ -70,6 +70,8 @@
 </div>
 
 
+
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/themes/redmond/jquery-ui.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.13.5/css/ui.jqgrid.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css">
@@ -108,6 +110,7 @@
         var curr = new Date();
         var allowed = new Date(curr.getTime() + 5*60000);
         var timeselector = $('.time-selector');
+        timeselector.datetimepicker('setDate', (new Date()));
         timeselector.datetimepicker({
             timeFormat: "HH:mm:ss",
             hour: curr.getHours(),
@@ -133,16 +136,17 @@
                             colNames: [ "ID", "Task", "Created at", "Scheduled at", "Result"],
                             colModel: [
                                 { name: "id", width:40 ,height:"auto"},
-                                { name: "value", width: 400, align: "right",height:"auto" },
-                                { name: "createdAt", width: 350, align: "right" ,height:"auto"},
-                                { name: "time", width: 350, align: "right" ,height:"auto"},
-                                { name: "result", width: 600, align: "right" ,height:"auto"}
+                                { name: "value", align: "right",height:"auto" },
+                                { name: "createdAt",  align: "right" ,height:"auto"},
+                                { name: "time",  align: "right" ,height:"auto"},
+                                { name: "result",  align: "right" ,height:"auto"}
                             ],
                             rowNum:7,
                             rownumbers:true,
                             viewrecords: true,
                             gridview: true,
                             autoencode: true,
+                            autowidth: true,
                             caption: "Recent Tasks"
                         });
         });
@@ -154,7 +158,8 @@
             var curr = new Date();
             var allowed = new Date(curr.getTime() + 5*60000);
             if (time < curr){
-                time = curr;
+                alert("Can not set task in the past");
+                return;
             }
             var value = $('.new .content').val();
             if (value.length > 20) {
