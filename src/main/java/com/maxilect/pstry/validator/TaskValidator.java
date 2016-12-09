@@ -23,7 +23,9 @@ public class TaskValidator {
         if (task.getTime() == null) {
             return false;
         }
-        //NOTE createdAt field is always filled on backend
+        if (task.getCreatedAt() == null) {
+            return false;
+        }
         return task.getTime().getTime() - task.getCreatedAt().getTime() < MAX_TIME_LENGTH_MINS;
     }
 }
