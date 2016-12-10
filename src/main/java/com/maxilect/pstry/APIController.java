@@ -16,9 +16,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
+/**
+ * Controller for REST API interface.
+ */
 @RestController
 public class APIController {
     final static Logger logger = Logger.getLogger(APIController.class);
+    private static final int TASKS_COUNT = 7;
 
     @Autowired
     private TaskMapper taskMapper;
@@ -28,6 +32,12 @@ public class APIController {
     @Autowired
     private SocketController socketController;
 
+
+    /**
+     * Processes incoming request for validates, stores and schedules task for execution. it and returns location of
+     * @param task
+     * @return  response with location of scheduled task
+     */
     @RequestMapping(method = RequestMethod.POST, value = "/task")
     ResponseEntity<?> addTask(@RequestBody Task task) {
         logger.debug("RECIVED: " + task);
@@ -44,14 +54,23 @@ public class APIController {
         return ResponseEntity.created(location).build();
     }
 
+    /**
+     * Provides result entity specified by related task id.
+     * @param taskId related task id
+     * @return result entity
+     */
     @RequestMapping(method = RequestMethod.GET, value = "/result/{taskId}")
     Result getResult(@PathVariable Long taskId) {
         return resultMapper.getResultByTaskId(taskId);
     }
 
+    /**
+     * Provides list of recent tasks.
+     * @return list of tasks.
+     */
     @RequestMapping(method = RequestMethod.GET, value = "/task/latest")
     List<Task> getLatestTasks() {
-        return taskMapper.getLatestTasks(7);
+        return taskMapper.getLatestTasks(TASKS_COUNT);
     }
 
 

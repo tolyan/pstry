@@ -67,6 +67,11 @@ public class SocketController {
         return "home";
     }
 
+
+    /**
+     * Registers Oracle Database Change Notification. Adds listener for changes in result table that retrieves result
+     * and sends it to subscribers of related topic.
+     */
     @PostConstruct
     public void registerNotification() {
         OracleConnection connection = null;

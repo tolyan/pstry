@@ -9,11 +9,6 @@ import java.util.Date;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-/**
- * Copyright DonRiver Inc. All Rights Reserved.
- * Created on: 08.12.16
- * Created by: Oleg Maximchuk
- */
 public class TaskValidatorTest {
 
     @Test

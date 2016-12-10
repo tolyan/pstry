@@ -1,6 +1,9 @@
 
 package com.maxilect.pstry;
 
+/**
+ * DTO for result entity.
+ */
 public class Result {
     private Long id;
     private Long taskId;

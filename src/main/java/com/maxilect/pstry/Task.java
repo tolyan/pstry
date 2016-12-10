@@ -9,6 +9,9 @@ import com.maxilect.pstry.util.Constants;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * DTO for task entity
+ */
 public class Task implements Serializable {
 
     private static final long serialVersionUID = 1L;
