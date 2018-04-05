@@ -24,7 +24,7 @@ Client sends HTTP POST request for order registration. Servlet recieves and vali
 During servlet initialization demon process is started on side of Oracle DB, that demon process listens to changes inside table containing results of order processes (Oracle Database Change Notification) and informs servlet about order processing results. In this case servlet sends data with corresponding order identificator to message queue. Client recieves these data and displays it to user.
 Also, client part subsribes to broadcast queue and recieves notification on every order update on servlet, after that client send REST request to servlet about 7 latest orders and displays it to user. 
 
-####Solution rationale
+#### Solution rationale
 This task puts most of the load on user interface generation and implementation of business logic (strings concatenation in our case). Our solution allows to transfer load of user interface generation to client machines and usage of websocket gives us opportunity to refrain from server polling and reduce server load even more. Load on implementation of business logic is transfered to RDBMS server and usage of Database Change Notification allows to reduce DB server polling as well. In result our servlet is fully stateless and used only to dispatch requests from client to RDBMS, thus can be easily replicated with load share via DNS, for instance.
 
 
@@ -62,7 +62,7 @@ This task puts most of the load on user interface generation and implementation 
 MVC и обеспечивает передачу данных между клиентской частью и БД. База данных
 хранит данные и обрабатывает их согласно бизнес-логике, отображённой в хранимых
 процедурах PL/SQL.
-###Стандартный жизненный цикл​ .
+### Стандартный жизненный цикл​ .
 Клиентская часть отправляет HTTP POST запрос для регистрации задачи.
 Сервлет принимает и валидирует REST запрос, после успешной валидации сервер
 сохраняет данные в БД, регистрирует работу в Oracle Job Scheduler и отправляет
