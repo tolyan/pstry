@@ -1,6 +1,6 @@
 ## English version
 ### Task
-Design and develop application that recieves data from user via Web-interface. Data should be transfered via HTTP RESTfull API. Backend communicates with with RDBMS. Data are stored in RDBMS in the form of processing order and should be consumed by background process on RDBMS server.
+Design and develop application that recieves data from user via Web-interface. Data should be transfered via HTTP RESTfull API. Backend communicates with RDBMS. Data are stored in RDBMS in the form of processing order and should be consumed by background process on RDBMS server.
 
 Data processing should result in concatenation of string passed by user with 3 string from previous orders. User should be notified about result of processing via Web-interface in 5 seconds after processing end. Besides order sending user should have posibility to view history of 7 previous orders. 
 
